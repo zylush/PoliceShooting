@@ -16,11 +16,20 @@ def _aggregate_city_metrics(dataframe: pd.DataFrame) -> pd.DataFrame:
     return dataframe.groupby(["state", "city_clean"], as_index=False).mean(numeric_only=True)
 
 
+def _impute_ages_by_state(incidents: pd.DataFrame) -> pd.DataFrame:
+    """Fill missing ages from the state median, then the overall median."""
+    result = incidents.copy()
+    ages = pd.to_numeric(result["age"], errors="coerce")
+    state_medians = ages.groupby(result["state"]).transform("median")
+    result["age"] = ages.fillna(state_medians).fillna(ages.median())
+    return result
+
+
 def transform_and_merge_datasets(
     cleaned_datasets: dict[str, pd.DataFrame], output_path: Path
 ) -> pd.DataFrame:
     """Engineer incident features, left-join city metrics, and export the master CSV."""
-    incidents = cleaned_datasets["police_killings"].copy()
+    incidents = _impute_ages_by_state(cleaned_datasets["police_killings"])
     incidents["year"] = incidents["date"].dt.year.astype("Int64")
     incidents["month"] = incidents["date"].dt.month.astype("Int64")
     incidents["year_month"] = incidents["date"].dt.strftime("%Y-%m").fillna("Unknown")

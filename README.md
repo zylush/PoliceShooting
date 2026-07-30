@@ -1,72 +1,93 @@
-## Police Shooting Cases within the US 2015-2017
+# Police Shootings & Socio-Economic Analytics Dashboard
 
-Just for funsies
+A multi-dataset analytics dashboard that merges **US police killings data (2015–2017)** with city-level socio-economic indicators (median income, poverty rate, high school completion, and racial demographics). Built with **FastAPI** and **Pandas**.
 
 ## Features
 
-- Solves **Unclear raw data report of Police Shooting cases within US**
-- Built for **Visualizing data**
+- **End-to-end data pipeline** — Load, clean, transform, merge, and analyze five source datasets automatically
+- **Interactive dashboard UI** — Filter by state, race, and flee type; view KPIs, charts, and a paginated incident table
+- **REST API** — JSON endpoints for stats, chart data, filter options, and paginated records
+- **Static chart exports** — PNG exports of timeline trends, race distribution, and state poverty rates via Matplotlib
+- **Socio-economic context** — Each incident is enriched with its city's poverty rate, median household income, high school completion rate, and racial composition
 
-## Getting started
+## Getting Started
 
 ### Prerequisites
 
-Before you begin, make sure you have installed:
-
-- [Requirement or runtime, such as Node.js, Python, or Docker]
-- [Any other required tool]
+- Python **≥3.14**
+- [uv](https://docs.astral.sh/uv/) (recommended) or `pip`
 
 ### Installation
 
 ```bash
-git clone https://github.com/zylush/PoliceShooting.git
-cd your-repository
+git clone https://github.com/zylush/Police-Shooting-Visualization.git
+cd Police-Shooting-Visualization
 ```
 
-Then install the project dependencies:
+Create a virtual environment and install dependencies:
 
 ```bash
-# Replace this with the appropriate command for your project.
-npm install
+# Using uv (recommended)
+uv sync
+
+# Or using pip
+python -m venv .venv
+.venv\Scripts\activate   # Windows
+# source .venv/bin/activate   # macOS/Linux
+pip install -r requirements.txt
 ```
 
-### Run locally
+### Run Locally
 
 ```bash
-# Replace this with the appropriate command for your project.
-npm run dev
+# Using the FastAPI CLI
+fastapi dev main.py
+
+# Or directly with Python
+python main.py
 ```
 
-Open the local address shown in your terminal.
+Open **http://127.0.0.1:8000** in your browser to view the dashboard.
 
 ## Usage
 
-Describe the simplest useful way to use the project. Include a short example if it helps:
+1. The dashboard loads automatically with full dataset KPIs and charts.
+2. Use the **filter dropdowns** (State, Race, Flee Type) to narrow down the data.
+3. Use the **search box** to find incidents by name, city, or weapon type.
+4. Navigate the **incident table** using pagination controls.
+5. The **REST API** is available at `/api/stats`, `/api/charts`, `/api/table`, and `/api/options`.
 
-```text
-[Example command, input, or workflow]
+### Example API Call
+
+```bash
+curl "http://127.0.0.1:8000/api/stats?state=WA&race=White"
 ```
 
-## Project structure
+## Project Structure
 
 ```text
 .
-+-- src/          # Application source code
-+-- tests/        # Automated tests
-+-- public/       # Static files (if applicable)
-`-- README.md
-`-- main.py       # FastAPI Dashboard
++-- data/
+|   +-- raw/                        # Source CSVs (PoliceKillingsUS.csv, etc.)
+|   +-- processed/                  # Cleaned output (CSV + PNG exports)
++-- src/
+|   +-- load_data.py                # CSV loading with filename aliases
+|   +-- clean_data.py               # Schema validation & type normalization
+|   +-- transform_data.py           # Feature engineering & city-level joins
+|   +-- analyze_data.py             # Filtering, KPI & chart aggregation logic
+|   +-- visualize.py                # Static chart export (PNG)
++-- tests/
+|   +-- test_load_data.py           # Pipeline acceptance tests
+|   +-- test_api.py                 # FastAPI integration tests
++-- main.py                         # FastAPI application & dashboard UI
++-- pyproject.toml                  # Project metadata & dependencies
++-- requirements.txt                # pip-compatible dependency list
++-- README.md
 ```
 
 ## Configuration
 
-If the project needs configuration, copy the example environment file and update its values:
-
-```bash
-cp .env.example .env
-```
-
-Never commit secrets, API keys, or private credentials.
+No additional configuration is required. The project loads source CSVs from `data/raw/` automatically. If you need to change the data directory, modify `BASE_DIR` / `RAW_DIR` in `main.py`.
 
 ## Contributing
 

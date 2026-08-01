@@ -101,6 +101,7 @@ def test_transform_imputes_missing_ages_by_state_then_overall_median(tmp_path: P
     merged = transform_and_merge_datasets(cleaned_datasets, tmp_path / "cleaned.csv")
 
     assert merged["age"].tolist() == [20.0, 40.0, 30.0, 30.0]
+    assert merged["age_imputed"].tolist() == [False, False, True, True]
     assert merged.loc[2, "age_group"] == "30-44"
     assert merged.loc[3, "age_group"] == "30-44"
 
@@ -116,3 +117,30 @@ def test_cleaning_requires_expected_source_columns() -> None:
                 "race_by_city": pd.DataFrame(),
             }
         )
+
+
+def test_kpi_quality_metrics_require_all_city_context_and_parse_boolean_strings() -> None:
+    dataframe = pd.DataFrame(
+        {
+            "date": pd.to_datetime(["2015-01-01", "2015-01-02"]),
+            "state": ["TX", "TX"],
+            "city_clean": ["Austin", "Dallas"],
+            "age": [30.0, 40.0],
+            "age_imputed": ["False", "True"],
+            "signs_of_mental_illness": [False, True],
+            "body_camera": [False, False],
+            "poverty_rate": [10.0, 12.0],
+            "median_income": [50000.0, 48000.0],
+            "percent_completed_hs": [90.0, 88.0],
+            "share_white": [50.0, 45.0],
+            "share_black": [10.0, 15.0],
+            "share_native_american": [1.0, 1.0],
+            "share_asian": [5.0, pd.NA],
+            "share_hispanic": [30.0, 32.0],
+        }
+    )
+
+    metrics = get_kpi_metrics(dataframe, dataframe)
+
+    assert metrics["age_imputed_pct"] == 50.0
+    assert metrics["city_context_coverage_pct"] == 50.0

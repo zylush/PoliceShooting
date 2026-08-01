@@ -21,7 +21,9 @@ def _impute_ages_by_state(incidents: pd.DataFrame) -> pd.DataFrame:
     result = incidents.copy()
     ages = pd.to_numeric(result["age"], errors="coerce")
     state_medians = ages.groupby(result["state"]).transform("median")
-    result["age"] = ages.fillna(state_medians).fillna(ages.median())
+    filled_ages = ages.fillna(state_medians).fillna(ages.median())
+    result["age_imputed"] = ages.isna() & filled_ages.notna()
+    result["age"] = filled_ages
     return result
 
 

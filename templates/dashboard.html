@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Executive analysis of US police fatality incidents and city socio-economic context."
+    />
+    <title>Public Safety Intelligence | Executive Dashboard</title>
+    <script src="/static/vendor/chart.umd.min.js" defer></script>
+    <link rel="stylesheet" href="/static/dashboard.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#mainContent">Skip to dashboard content</a>
+    <header class="app-header">
+      <div class="shell header-row">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">PS</div>
+          <div>
+            <p class="eyebrow">Public Safety Intelligence</p>
+            <h1>Police Fatalities & Community Context</h1>
+          </div>
+        </div>
+        <div class="header-meta" aria-label="Dataset metadata">
+          <div class="meta-pill">
+            <span>Reporting period</span
+            ><strong id="metaReportingPeriod">Loading…</strong>
+          </div>
+          <div class="meta-pill">
+            <span>Data refreshed</span
+            ><strong id="metaLastRefresh">Loading…</strong>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="filter-band">
+      <div class="shell">
+        <form id="filterForm" class="filter-form" aria-label="Global filters">
+          <div class="filter-field">
+            <label for="stateFilter">State</label
+            ><select id="stateFilter">
+              <option value="">All states</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label for="raceFilter">Race / ethnicity</label
+            ><select id="raceFilter">
+              <option value="">All groups</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label for="fleeFilter">Flee status</label
+            ><select id="fleeFilter">
+              <option value="">All statuses</option>
+            </select>
+          </div>
+          <button id="applyFilters" class="button button-primary" type="submit">
+            Apply filters</button
+          ><button
+            id="resetFilters"
+            class="button button-secondary"
+            type="button"
+          >
+            Reset
+          </button>
+          <div id="activeFilters" class="active-filters" aria-live="polite">
+            No filters applied
+          </div>
+        </form>
+      </div>
+    </div>
+    <main id="mainContent" class="shell dashboard-main">
+      <div id="dashboardStatus" class="status" role="status" aria-live="polite">
+        Loading dashboard data
+      </div>
+      <div id="dashboardError" class="error-banner" role="alert" hidden></div>
+      <section class="intro" aria-labelledby="dashboardTitle">
+        <div>
+          <p class="eyebrow">Executive Dashboard</p>
+          <h2 id="dashboardTitle">
+            A clear view of incident patterns and local context
+          </h2>
+          <p>
+            Explore when and where fatal encounters occurred, the people
+            affected, and the socio-economic profile of the associated cities.
+            Filters update every view together.
+          </p>
+        </div>
+        <div id="selectionScope" class="scope-badge">Preparing analysis…</div>
+      </section>
+      <section aria-labelledby="overviewHeading">
+        <div class="section-heading">
+          <div>
+            <h2 id="overviewHeading">Incident overview</h2>
+            <p>Primary indicators for the current selection</p>
+          </div>
+        </div>
+        <div class="kpi-grid">
+          <article class="kpi-card">
+            <div class="kpi-label">Fatal incidents</div>
+            <div id="kpiTotal" class="kpi-value">—</div>
+            <div id="kpiTotalNote" class="kpi-note">
+              Share of the full dataset
+            </div>
+          </article>
+          <article class="kpi-card">
+            <div class="kpi-label">Average victim age</div>
+            <div id="kpiAge" class="kpi-value">—</div>
+            <div class="kpi-note">Years; missing ages are median-imputed</div>
+          </article>
+          <article class="kpi-card">
+            <div class="kpi-label">Mental illness indicated</div>
+            <div id="kpiMental" class="kpi-value">—</div>
+            <div class="kpi-note">Share of selected incidents</div>
+          </article>
+          <article class="kpi-card">
+            <div class="kpi-label">Body camera present</div>
+            <div id="kpiCamera" class="kpi-value">—</div>
+            <div class="kpi-note">Share of selected incidents</div>
+          </article>
+        </div>
+      </section>
+      <section class="section" aria-labelledby="contextHeading">
+        <div class="section-heading">
+          <div>
+            <h2 id="contextHeading">Community context</h2>
+            <p>Average city-level indicators linked to selected incidents</p>
+          </div>
+        </div>
+        <div class="context-grid">
+          <article class="context-card">
+            <div class="context-icon" aria-hidden="true">%</div>
+            <div>
+              <p>City poverty rate</p>
+              <strong id="kpiPoverty">—</strong>
+            </div>
+          </article>
+          <article class="context-card">
+            <div class="context-icon" aria-hidden="true">$</div>
+            <div>
+              <p>Median household income</p>
+              <strong id="kpiIncome">—</strong>
+            </div>
+          </article>
+          <article class="context-card">
+            <div class="context-icon" aria-hidden="true">HS</div>
+            <div>
+              <p>High school completion</p>
+              <strong id="kpiHS">—</strong>
+            </div>
+          </article>
+        </div>
+      </section>
+      <section
+        class="section data-quality-panel"
+        aria-labelledby="dataQualityHeading"
+      >
+        <div class="data-quality-copy">
+          <p class="eyebrow">Methodology</p>
+          <h2 id="dataQualityHeading">Data quality at a glance</h2>
+          <p>
+            Coverage and estimation rates update with the global filters, so
+            every KPI can be interpreted in context.
+          </p>
+        </div>
+        <div class="data-quality-metrics">
+          <div class="data-quality-metric">
+            <strong id="dataContextCoverage">&mdash;</strong>
+            <span>Records with complete city context</span>
+          </div>
+          <div class="data-quality-metric">
+            <strong id="dataAgeImputed">&mdash;</strong>
+            <span>Ages estimated using median fallback</span>
+          </div>
+        </div>
+      </section>
+      <section class="section" aria-labelledby="geographyHeading">
+        <div class="section-heading">
+          <div>
+            <h2 id="geographyHeading">Geographic concentration</h2>
+            <p>Select a state tile to apply it as a global filter</p>
+          </div>
+        </div>
+        <div class="grid-2-1">
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Incidents by state</h3>
+                <p>
+                  Tile position approximates US geography; darker tiles indicate
+                  more incidents.
+                </p>
+              </div>
+              <div class="map-legend">
+                <span>Fewer</span
+                ><span class="legend-ramp" aria-hidden="true"></span
+                ><span>More</span>
+              </div>
+            </div>
+            <div class="map-scroll">
+              <div
+                id="stateMap"
+                class="state-map"
+                aria-label="Interactive state incident map"
+              ></div>
+            </div>
+            <p id="mapSummary" class="chart-summary">
+              Loading state distribution…
+            </p>
+          </article>
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Highest-volume states</h3>
+                <p>Top ten states in the current selection</p>
+              </div>
+            </div>
+            <div class="chart-wrap">
+              <canvas
+                id="statesChart"
+                role="img"
+                aria-label="Top states by incident count"
+                aria-describedby="statesData"
+              ></canvas>
+            </div>
+            <p id="statesSummary" class="chart-summary"></p>
+            <p id="statesData" class="sr-only"></p>
+          </article>
+        </div>
+      </section>
+      <section class="section" aria-labelledby="trendHeading">
+        <div class="section-heading">
+          <div>
+            <h2 id="trendHeading">Trend and demographics</h2>
+            <p>Timing and population patterns in the selected records</p>
+          </div>
+        </div>
+        <div class="grid-2-1">
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Monthly incident trend</h3>
+                <p>Count of incidents by month</p>
+              </div>
+            </div>
+            <div class="chart-wrap">
+              <canvas
+                id="timelineChart"
+                role="img"
+                aria-label="Monthly incident trend"
+                aria-describedby="timelineData"
+              ></canvas>
+            </div>
+            <p id="timelineSummary" class="chart-summary"></p>
+            <p id="timelineData" class="sr-only"></p>
+          </article>
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Race / ethnicity</h3>
+                <p>Distribution within selected incidents</p>
+              </div>
+            </div>
+            <div class="chart-wrap">
+              <canvas
+                id="raceChart"
+                role="img"
+                aria-label="Race and ethnicity distribution"
+                aria-describedby="raceData"
+              ></canvas>
+            </div>
+            <p id="raceSummary" class="chart-summary"></p>
+            <p id="raceData" class="sr-only"></p>
+          </article>
+        </div>
+      </section>
+      <section class="section" aria-labelledby="patternsHeading">
+        <div class="section-heading">
+          <div>
+            <h2 id="patternsHeading">Operational patterns</h2>
+            <p>Age, armed status, and poverty context</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Age groups</h3>
+                <p>Selected incidents by age band</p>
+              </div>
+            </div>
+            <div class="chart-wrap compact">
+              <canvas
+                id="ageChart"
+                role="img"
+                aria-label="Age group distribution"
+                aria-describedby="ageData"
+              ></canvas>
+            </div>
+            <p id="ageSummary" class="chart-summary"></p>
+            <p id="ageData" class="sr-only"></p>
+          </article>
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Armed status</h3>
+                <p>Most frequently recorded categories</p>
+              </div>
+            </div>
+            <div class="chart-wrap compact">
+              <canvas
+                id="armedChart"
+                role="img"
+                aria-label="Armed status distribution"
+                aria-describedby="armedData"
+              ></canvas>
+            </div>
+            <p id="armedSummary" class="chart-summary"></p>
+            <p id="armedData" class="sr-only"></p>
+          </article>
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>State poverty context</h3>
+                <p>Average city poverty rate for top states</p>
+              </div>
+            </div>
+            <div class="chart-wrap compact">
+              <canvas
+                id="povertyChart"
+                role="img"
+                aria-label="Average poverty rate by state"
+                aria-describedby="povertyData"
+              ></canvas>
+            </div>
+            <p id="povertySummary" class="chart-summary"></p>
+            <p id="povertyData" class="sr-only"></p>
+          </article>
+        </div>
+      </section>
+      <section class="section panel" aria-labelledby="recordsHeading">
+        <div class="table-tools">
+          <div>
+            <h2 id="recordsHeading" class="records-heading">
+              Incident records
+            </h2>
+            <p class="records-subtitle">
+              Record-level evidence with linked city context
+            </p>
+          </div>
+          <div class="search-field">
+            <label for="tableSearch">Search records</label
+            ><input
+              id="tableSearch"
+              type="search"
+              maxlength="200"
+              placeholder="Name, city, or armed status"
+            />
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Date</th>
+                <th scope="col">Age</th>
+                <th scope="col">Race / ethnicity</th>
+                <th scope="col">Armed status</th>
+                <th scope="col">Location</th>
+                <th scope="col">City poverty</th>
+                <th scope="col">City income</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+        <div id="tableEmptyState" class="empty-state" hidden>
+          No records match the current filters and search.
+        </div>
+        <div class="pagination">
+          <span id="pageInfo">Loading records…</span>
+          <div class="pagination-actions">
+            <button id="btnPrev" class="button button-secondary" type="button">
+              Previous</button
+            ><button id="btnNext" class="button button-secondary" type="button">
+              Next
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="footer">
+      <div class="shell">
+        <span
+          >Source: Washington Post police shootings dataset with US Census city
+          indicators.</span
+        ><span
+          >Descriptive analysis only; association does not imply
+          causation.</span
+        >
+      </div>
+    </footer>
+    <script src="/static/dashboard.js" defer></script>
+  </body>
+</html>

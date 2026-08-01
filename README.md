@@ -49,13 +49,24 @@ python main.py
 
 Open **http://127.0.0.1:8000** in your browser to view the dashboard.
 
+## Dashboard Experience
+
+- **Executive overview** with selection share, geographic coverage, incident KPIs, and city context
+- **Interactive state intensity map** with keyboard-accessible details and click-to-filter behavior
+- **Linked visual analysis** for monthly trends, race and ethnicity, age groups, armed status, state volume, and poverty context
+- **Enterprise interaction states** including active filters, loading feedback, recoverable errors, empty results, and precise pagination
+- **Accessible controls** with semantic labels, focus states, live status announcements, and chart summaries
+- **Data-quality transparency** showing complete city-context coverage and median-imputed age rates for every selection
+
+The dashboard reads the server-provided refresh timestamp and updates all KPIs, maps, charts, and records from the same global filter selection.
+
 ## Usage
 
 1. The dashboard loads automatically with full dataset KPIs and charts.
 2. Use the **filter dropdowns** (State, Race, Flee Type) to narrow down the data.
 3. Use the **search box** to find incidents by name, city, or weapon type.
 4. Navigate the **incident table** using pagination controls.
-5. The **REST API** is available at `/api/stats`, `/api/charts`, `/api/table`, and `/api/options`.
+5. The **REST API** is available at `/api/stats`, `/api/charts`, `/api/map`, `/api/table`, and `/api/options`.
 
 ### Example API Call
 
@@ -79,7 +90,8 @@ curl "http://127.0.0.1:8000/api/stats?state=WA&race=White"
 +-- tests/
 |   +-- test_load_data.py           # Pipeline acceptance tests
 |   +-- test_api.py                 # FastAPI integration tests
-+-- main.py                         # FastAPI application & dashboard UI
++-- templates/dashboard.html       # Responsive enterprise dashboard UI
++-- main.py                         # FastAPI application and analytics API
 +-- pyproject.toml                  # Project metadata & dependencies
 +-- requirements.txt                # pip-compatible dependency list
 +-- README.md
